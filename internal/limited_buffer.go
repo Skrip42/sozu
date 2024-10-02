@@ -18,7 +18,7 @@ func (f *limitedFabric[V]) Create(
 	beforeSend func(V, func()),
 	afterSend func(V, func()),
 	beforeFlush func(),
-	afterFlush func(),
+	afterFlush func(int),
 	capacity int,
 ) <-chan []V {
 	counter := 0
@@ -31,9 +31,9 @@ func (f *limitedFabric[V]) Create(
 		afterSend(item, flush)
 	}
 
-	flush := func() {
-		counter = 0
-		afterFlush()
+	flush := func(flushCount int) {
+		counter -= flushCount
+		afterFlush(flushCount)
 	}
 
 	return f.base.Create(

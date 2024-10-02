@@ -34,7 +34,7 @@ func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(
 		func(_ V, _ func()) {},
 		func(_ V, _ func()) {},
 		func() {},
-		func() {},
+		func(_ int) {},
 		0,
 	), flush
 }

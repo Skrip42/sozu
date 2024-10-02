@@ -18,7 +18,7 @@ func (f *simpleFabric[V]) Create(
 	beforeSend func(V, func()),
 	afterSend func(V, func()),
 	beforeFlush func(),
-	afterFlush func(),
+	afterFlush func(int),
 	capacity int,
 ) <-chan []V {
 	output := make(chan []V)
@@ -29,7 +29,8 @@ func (f *simpleFabric[V]) Create(
 			return
 		}
 		beforeFlush()
-		tmp := make([]V, len(buffer))
+		flushCount := len(buffer)
+		tmp := make([]V, flushCount)
 		copy(tmp, buffer)
 		buffer = buffer[:0]
 
@@ -38,7 +39,7 @@ func (f *simpleFabric[V]) Create(
 		case <-ctx.Done():
 		}
 
-		afterFlush()
+		afterFlush(flushCount)
 	}
 
 	go func() {

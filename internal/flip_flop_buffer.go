@@ -18,7 +18,7 @@ func (f *flipFlopFabric[V, C]) Create(
 	beforeSend func(V, func()),
 	afterSend func(V, func()),
 	beforeFlush func(),
-	afterFlush func(),
+	afterFlush func(int),
 	capacity int,
 ) <-chan []V {
 	var state C

@@ -30,7 +30,7 @@ func (f *multiplexorFabric[V, C]) Create(
 	beforeSend func(V, func()),
 	afterSend func(V, func()),
 	beforeFlush func(),
-	afterFlush func(),
+	afterFlush func(int),
 	capacity int,
 ) <-chan []V {
 	runCtx, cancel := context.WithCancel(ctx)
@@ -50,8 +50,10 @@ func (f *multiplexorFabric[V, C]) Create(
 			flushMap[selector],
 			func(_ V, _ func()) {},
 			func(_ V, _ func()) {},
-			func() {},
-			func() {},
+			beforeFlush,
+			afterFlush,
+			// func() {},
+			// func(_ int) {},
 			capacity,
 		)
 		outWg.Add(1)
@@ -78,7 +80,7 @@ func (f *multiplexorFabric[V, C]) Create(
 	}
 
 	flush := func() {
-		beforeFlush()
+		// beforeFlush()
 		wg := sync.WaitGroup{}
 		wg.Add(len(flushMap))
 		for _, fl := range flushMap {
@@ -92,7 +94,7 @@ func (f *multiplexorFabric[V, C]) Create(
 			}()
 		}
 		wg.Wait()
-		afterFlush()
+		// afterFlush()
 	}
 
 	go func() {

@@ -21,9 +21,10 @@ func (f *timerFabric[V]) Create(
 	beforeSend func(V, func()),
 	afterSend func(V, func()),
 	beforeFlush func(),
-	afterFlush func(),
+	afterFlush func(int),
 	capacity int,
 ) <-chan []V {
+	counter := 0
 	var tmStatus bool
 	var tm *time.Timer
 	stopTimer := func() {
@@ -48,11 +49,15 @@ func (f *timerFabric[V]) Create(
 		if !tmStatus {
 			startTimer()
 		}
+		counter++
 		afterSend(item, flush)
 	}
-	flush := func() {
-		stopTimer()
-		afterFlush()
+	flush := func(flushCount int) {
+		counter -= flushCount
+		if counter == 0 {
+			stopTimer()
+		}
+		afterFlush(flushCount)
 	}
 
 	go func() {
