@@ -46,3 +46,11 @@ func NewBuffer[V any](opts ...applyOptionFunc[V]) Fabric[V] {
 	}
 	return &fabric[V]{fb}
 }
+
+func NewAggregator[V any](aggregateFunc func(V, V) V, opts ...applyOptionFunc[V]) Fabric[V] {
+	fb := internal.NewAggregatorFabric(aggregateFunc)
+	for _, opt := range opts {
+		fb = opt(fb)
+	}
+	return &fabric[V]{fb}
+}

@@ -9,8 +9,10 @@ import (
 	"go.uber.org/goleak"
 )
 
-type BufferFabricSuite struct {
+type AggregatorFabricSuite struct {
 	suite.Suite
+
+	aggregateFunc func(a, b int) int
 
 	beforeSendCounter  int
 	afterSendCounter   int
@@ -29,7 +31,12 @@ type BufferFabricSuite struct {
 	fabric Fabric[int]
 }
 
-func (s *BufferFabricSuite) SetupTest() {
+func (s *AggregatorFabricSuite) SetupTest() {
+
+	s.aggregateFunc = func(a, b int) int {
+		return a + b
+	}
+
 	s.beforeSendCounter = 0
 	s.afterSendCounter = 0
 	s.beforeFlushCounter = 0
@@ -55,18 +62,18 @@ func (s *BufferFabricSuite) SetupTest() {
 		s.afterFlushValues = append(s.afterFlushValues, count)
 	}
 
-	s.fabric = NewBufferFabric[int]()
+	s.fabric = NewAggregatorFabric[int](s.aggregateFunc)
 }
 
-func (s *BufferFabricSuite) TearDownTest() {
+func (s *AggregatorFabricSuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestBufferFabric(t *testing.T) {
-	suite.Run(t, &BufferFabricSuite{})
+func TestAggregatorFabric(t *testing.T) {
+	suite.Run(t, &AggregatorFabricSuite{})
 }
 
-func (s *BufferFabricSuite) TestWithAfterSendFlush() {
+func (s *AggregatorFabricSuite) TestWithAfterSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -89,16 +96,17 @@ func (s *BufferFabricSuite) TestWithAfterSendFlush() {
 	)
 
 	go func() {
-		inputChan <- 0
 		inputChan <- 1
+		inputChan <- 2
+
 	}()
 
 	values, ok := <-output
 	s.True(ok)
-	s.Equal([]int{0}, values)
+	s.Equal([]int{1}, values)
 	values, ok = <-output
 	s.True(ok)
-	s.Equal([]int{1}, values)
+	s.Equal([]int{3}, values)
 	cancel()
 	_, ok = <-output
 	s.False(ok)
@@ -108,12 +116,12 @@ func (s *BufferFabricSuite) TestWithAfterSendFlush() {
 	s.Equal(2, s.beforeFlushCounter)
 	s.Equal(2, s.afterFlushCounter)
 
-	s.Equal([]int{0, 1}, s.beforeSendValues)
-	s.Equal([]int{0, 1}, s.afterSendValues)
+	s.Equal([]int{1, 2}, s.beforeSendValues)
+	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
 }
 
-func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
+func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -138,8 +146,8 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 	go func() {
 		await, done := helper.NewSyncer(ctx)
 
-		inputChan <- 0
 		inputChan <- 1
+		inputChan <- 2
 		flushChan <- func() { done() }
 		await()
 
@@ -148,10 +156,10 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 
 	values, ok := <-output
 	s.True(ok)
-	s.Equal([]int{0}, values)
+	s.Equal([]int{1}, values)
 	values, ok = <-output
 	s.True(ok)
-	s.Equal([]int{1}, values)
+	s.Equal([]int{3}, values)
 	_, ok = <-output
 	s.False(ok)
 
@@ -160,12 +168,12 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 	s.Equal(2, s.beforeFlushCounter)
 	s.Equal(2, s.afterFlushCounter)
 
-	s.Equal([]int{0, 1}, s.beforeSendValues)
-	s.Equal([]int{0, 1}, s.afterSendValues)
+	s.Equal([]int{1, 2}, s.beforeSendValues)
+	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
 }
 
-func (s *BufferFabricSuite) TestWithClosedFlush() {
+func (s *AggregatorFabricSuite) TestWithClosedFlush() {
 	ctx, _ := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -185,8 +193,8 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 	go func() {
 		await, done := helper.NewSyncer(ctx)
 
-		inputChan <- 0
 		inputChan <- 1
+		inputChan <- 2
 		flushChan <- func() { done() }
 		await()
 
@@ -195,7 +203,7 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 
 	values, ok := <-output
 	s.True(ok)
-	s.Equal([]int{0, 1}, values)
+	s.Equal([]int{3}, values)
 	_, ok = <-output
 	s.False(ok)
 
@@ -204,12 +212,12 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 	s.Equal(1, s.beforeFlushCounter)
 	s.Equal(1, s.afterFlushCounter)
 
-	s.Equal([]int{0, 1}, s.beforeSendValues)
-	s.Equal([]int{0, 1}, s.afterSendValues)
+	s.Equal([]int{1, 2}, s.beforeSendValues)
+	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
 }
 
-func (s *BufferFabricSuite) TestWithClosedInput() {
+func (s *AggregatorFabricSuite) TestWithClosedInput() {
 	ctx, _ := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -229,8 +237,8 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 	go func() {
 		await, done := helper.NewSyncer(ctx)
 
-		inputChan <- 0
 		inputChan <- 1
+		inputChan <- 2
 		flushChan <- func() { done() }
 		await()
 
@@ -239,7 +247,7 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 
 	values, ok := <-output
 	s.True(ok)
-	s.Equal([]int{0, 1}, values)
+	s.Equal([]int{3}, values)
 	_, ok = <-output
 	s.False(ok)
 
@@ -248,12 +256,12 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 	s.Equal(1, s.beforeFlushCounter)
 	s.Equal(1, s.afterFlushCounter)
 
-	s.Equal([]int{0, 1}, s.beforeSendValues)
-	s.Equal([]int{0, 1}, s.afterSendValues)
+	s.Equal([]int{1, 2}, s.beforeSendValues)
+	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
 }
 
-func (s *BufferFabricSuite) TestOk() {
+func (s *AggregatorFabricSuite) TestOk() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -273,11 +281,11 @@ func (s *BufferFabricSuite) TestOk() {
 	go func() {
 		await, done := helper.NewSyncer(ctx)
 
-		inputChan <- 0
 		inputChan <- 1
+		inputChan <- 2
 		flushChan <- func() { done() }
 		await()
-		inputChan <- 2
+		inputChan <- 3
 		flushChan <- func() { done() }
 		await()
 		flushChan <- func() { done() }
@@ -288,10 +296,10 @@ func (s *BufferFabricSuite) TestOk() {
 
 	values, ok := <-output
 	s.True(ok)
-	s.Equal([]int{0, 1}, values)
+	s.Equal([]int{3}, values)
 	values, ok = <-output
 	s.True(ok)
-	s.Equal([]int{2}, values)
+	s.Equal([]int{6}, values)
 	_, ok = <-output
 	s.False(ok)
 
@@ -300,7 +308,7 @@ func (s *BufferFabricSuite) TestOk() {
 	s.Equal(2, s.beforeFlushCounter)
 	s.Equal(2, s.afterFlushCounter)
 
-	s.Equal([]int{0, 1, 2}, s.beforeSendValues)
-	s.Equal([]int{0, 1, 2}, s.afterSendValues)
+	s.Equal([]int{1, 2, 3}, s.beforeSendValues)
+	s.Equal([]int{1, 2, 3}, s.afterSendValues)
 	s.Equal([]int{2, 1}, s.afterFlushValues)
 }
