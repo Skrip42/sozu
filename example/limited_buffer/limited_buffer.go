@@ -11,7 +11,7 @@ import (
 func main() {
 	ch := make(chan int)
 
-	fabric := sozu.New[int](sozu.WithLimit[int](6))
+	fabric := sozu.NewBuffer[int](sozu.WithLimit[int](6))
 
 	wg := sync.WaitGroup{}
 

@@ -16,7 +16,7 @@ func main() {
 		return i%2 == 0
 	}
 
-	fabric := sozu.New[int](sozu.WithFlipFlop(criteria))
+	fabric := sozu.NewBuffer[int](sozu.WithFlipFlop(criteria))
 
 	wg := sync.WaitGroup{}
 

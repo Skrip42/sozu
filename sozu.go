@@ -39,8 +39,8 @@ func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(
 	), flush
 }
 
-func New[V any](opts ...applyOptionFunc[V]) Fabric[V] {
-	fb := internal.NewSimpleFabric[V]()
+func NewBuffer[V any](opts ...applyOptionFunc[V]) Fabric[V] {
+	fb := internal.NewBufferFabric[V]()
 	for _, opt := range opts {
 		fb = opt(fb)
 	}

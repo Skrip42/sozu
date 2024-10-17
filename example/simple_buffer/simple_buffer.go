@@ -10,7 +10,7 @@ import (
 
 func main() {
 	ch := make(chan int)
-	fabric := sozu.New[int]()
+	fabric := sozu.NewBuffer[int]()
 
 	wg := sync.WaitGroup{}
 

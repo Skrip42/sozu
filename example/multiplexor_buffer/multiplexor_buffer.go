@@ -15,7 +15,7 @@ func main() {
 		return i % 3
 	}
 
-	fabric := sozu.New[int](sozu.WithMultiplexor(separator, 3))
+	fabric := sozu.NewBuffer[int](sozu.WithMultiplexor(separator, 3))
 
 	wg := sync.WaitGroup{}
 

@@ -12,7 +12,7 @@ import (
 func main() {
 	ch := make(chan int)
 
-	fabric := sozu.New[int](sozu.WithTimer[int](time.Millisecond * 100))
+	fabric := sozu.NewBuffer[int](sozu.WithTimer[int](time.Millisecond * 100))
 
 	wg := sync.WaitGroup{}
 

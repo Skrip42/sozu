@@ -4,14 +4,14 @@ import (
 	"context"
 )
 
-type simpleFabric[V any] struct {
+type bufferFabric[V any] struct {
 }
 
-func NewSimpleFabric[V any]() Fabric[V] {
-	return &simpleFabric[V]{}
+func NewBufferFabric[V any]() Fabric[V] {
+	return &bufferFabric[V]{}
 }
 
-func (f *simpleFabric[V]) Create(
+func (f *bufferFabric[V]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),
@@ -54,10 +54,15 @@ func (f *simpleFabric[V]) Create(
 				beforeSend(item, flush)
 				buffer = append(buffer, item)
 				afterSend(item, flush)
-			case done := <-flushCh:
+			case done, ok := <-flushCh:
+				if !ok {
+					flush()
+					return
+				}
 				flush()
 				done()
 			case <-ctx.Done():
+				return
 			}
 		}
 	}()

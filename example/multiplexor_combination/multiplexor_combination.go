@@ -15,7 +15,7 @@ func main() {
 		return i % 3
 	}
 
-	fabric := sozu.New[int](
+	fabric := sozu.NewBuffer[int](
 		sozu.WithLimit[int](5), // limit = 5 for each
 		sozu.WithMultiplexor(separator, 3),
 		sozu.WithLimit[int](10), // limit = 10 for all
