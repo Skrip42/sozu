@@ -1,5 +1,7 @@
 package internal
 
+//go:generate mockgen -typed -destination=fabric_mock.go -source=fabric.go -package=internal
+
 import "context"
 
 type Fabric[V any] interface {
