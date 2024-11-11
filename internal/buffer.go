@@ -36,10 +36,9 @@ func (f *bufferFabric[V]) Create(
 
 		select {
 		case output <- tmp:
+			afterFlush(flushCount)
 		case <-ctx.Done():
 		}
-
-		afterFlush(flushCount)
 	}
 
 	go func() {
