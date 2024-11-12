@@ -23,8 +23,7 @@ type TimerFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	base     *MockFabric[int]
-	criteria func(int) bool
+	base *MockFabric[int]
 
 	fabric Fabric[int]
 }
@@ -51,9 +50,6 @@ func (s *TimerFabricSuite) SetupTest() {
 	}
 
 	s.base = NewMockFabric[int](ctrl)
-	s.criteria = func(i int) bool {
-		return i%2 == 0
-	}
 
 	s.fabric = NewTimerFabric(s.base, time.Millisecond)
 }

@@ -34,17 +34,19 @@ func (f *multiplexorFabric[V, C]) Create(
 	capacity int,
 	cancel context.CancelFunc,
 ) <-chan []V {
-	runCtx, cancel := context.WithCancel(ctx)
+	runCtx, runCancel := context.WithCancel(ctx)
 	output := make(chan []V)
 
 	flushMap := make(map[C]chan func(), f.capacity)
 	inputMap := make(map[C]chan V, f.capacity)
+	lastAfterFlushCount := make(map[C]int, f.capacity)
 
 	outWg := sync.WaitGroup{}
 
 	addBufer := func(selector C) chan V {
 		inputMap[selector] = make(chan V)
 		flushMap[selector] = make(chan func())
+		lastAfterFlushCount[selector] = 0
 		outputCh := f.base.Create(
 			runCtx,
 			inputMap[selector],
@@ -52,7 +54,7 @@ func (f *multiplexorFabric[V, C]) Create(
 			func(_ V, _ func()) {},
 			func(_ V, _ func()) {},
 			beforeFlush,
-			afterFlush,
+			func(count int) { lastAfterFlushCount[selector] = count },
 			capacity,
 			cancel,
 		)
@@ -67,6 +69,7 @@ func (f *multiplexorFabric[V, C]) Create(
 					}
 					select {
 					case output <- items:
+						afterFlush(lastAfterFlushCount[selector])
 					case <-runCtx.Done():
 						return
 					}
@@ -85,10 +88,9 @@ func (f *multiplexorFabric[V, C]) Create(
 		for _, fl := range flushMap {
 			go func() {
 				select {
-				case fl <- func() {
-					wg.Done()
-				}:
+				case fl <- func() { wg.Done() }:
 				case <-runCtx.Done():
+					wg.Done()
 				}
 			}()
 		}
@@ -96,7 +98,7 @@ func (f *multiplexorFabric[V, C]) Create(
 	}
 
 	go func() {
-		defer cancel()
+		defer runCancel()
 		for {
 			select {
 			case item, ok := <-inputCh:
