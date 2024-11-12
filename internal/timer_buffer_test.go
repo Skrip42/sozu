@@ -3,13 +3,14 @@ package internal
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 	"go.uber.org/mock/gomock"
 )
 
-type FlipFlopFabricSuite struct {
+type TimerFabricSuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -28,7 +29,7 @@ type FlipFlopFabricSuite struct {
 	fabric Fabric[int]
 }
 
-func (s *FlipFlopFabricSuite) SetupTest() {
+func (s *TimerFabricSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 
 	s.beforeSendCounter = 0
@@ -54,18 +55,18 @@ func (s *FlipFlopFabricSuite) SetupTest() {
 		return i%2 == 0
 	}
 
-	s.fabric = NewFlipFlopFabric(s.base, s.criteria)
+	s.fabric = NewTimerFabric(s.base, time.Millisecond)
 }
 
-func (s *FlipFlopFabricSuite) TearDownTest() {
+func (s *TimerFabricSuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestFlipFlopFabric(t *testing.T) {
-	suite.Run(t, &FlipFlopFabricSuite{})
+func TestTimerFabric(t *testing.T) {
+	suite.Run(t, &TimerFabricSuite{})
 }
 
-func (s *FlipFlopFabricSuite) TestOk() {
+func (s *TimerFabricSuite) TestOk() {
 	flushCounter := 0
 	flush := func() {
 		flushCounter++
@@ -78,6 +79,7 @@ func (s *FlipFlopFabricSuite) TestOk() {
 
 	outputCh := make(chan []int)
 	var sendF func(int, func())
+	var flushF func(int)
 
 	s.base.EXPECT().Create(
 		ctx,
@@ -87,7 +89,7 @@ func (s *FlipFlopFabricSuite) TestOk() {
 		gomock.Any(),
 		gomock.Any(),
 		gomock.Any(),
-		capacity,
+		10,
 		gomock.Any(),
 	).DoAndReturn(
 		func(
@@ -101,15 +103,14 @@ func (s *FlipFlopFabricSuite) TestOk() {
 			_ int,
 			_ context.CancelFunc,
 		) <-chan []int {
-			sendF = beforeSend
+			sendF = afterSend
+			flushF = afterFlush
 			// Check is function original
-			afterSend(1, func() {})
+			beforeSend(1, func() {})
 			beforeFlush()
-			afterFlush(1)
 
-			s.Equal(1, s.afterSendCounter)
+			s.Equal(1, s.beforeSendCounter)
 			s.Equal(1, s.beforeFlushCounter)
-			s.Equal(1, s.afterFlushCounter)
 
 			return outputCh
 		},
@@ -137,16 +138,11 @@ func (s *FlipFlopFabricSuite) TestOk() {
 
 	// check logick
 	sendF(1, flush)
-	sendF(3, flush)
-	s.Equal(0, flushCounter)
-	s.Equal(2, s.beforeSendCounter)
-	sendF(2, flush)
-	s.Equal(1, flushCounter)
-	s.Equal(3, s.beforeSendCounter)
-	sendF(2, flush)
-	s.Equal(1, flushCounter)
-	s.Equal(4, s.beforeSendCounter)
-	sendF(5, flush)
-	s.Equal(2, flushCounter)
-	s.Equal(5, s.beforeSendCounter)
+	<-flushCh
+	s.Equal(1, s.afterSendCounter)
+
+	flushF(0)
+	s.Equal(1, s.afterFlushCounter)
+
+	cancel()
 }

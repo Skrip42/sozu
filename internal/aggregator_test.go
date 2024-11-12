@@ -93,6 +93,7 @@ func (s *AggregatorFabricSuite) TestWithAfterSendFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -119,6 +120,9 @@ func (s *AggregatorFabricSuite) TestWithAfterSendFlush() {
 	s.Equal([]int{1, 2}, s.beforeSendValues)
 	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
@@ -141,6 +145,7 @@ func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -171,10 +176,13 @@ func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
 	s.Equal([]int{1, 2}, s.beforeSendValues)
 	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *AggregatorFabricSuite) TestWithClosedFlush() {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
 	flushChan := make(chan func())
@@ -188,6 +196,7 @@ func (s *AggregatorFabricSuite) TestWithClosedFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -215,10 +224,13 @@ func (s *AggregatorFabricSuite) TestWithClosedFlush() {
 	s.Equal([]int{1, 2}, s.beforeSendValues)
 	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *AggregatorFabricSuite) TestWithClosedInput() {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
 	flushChan := make(chan func())
@@ -232,6 +244,7 @@ func (s *AggregatorFabricSuite) TestWithClosedInput() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -259,6 +272,9 @@ func (s *AggregatorFabricSuite) TestWithClosedInput() {
 	s.Equal([]int{1, 2}, s.beforeSendValues)
 	s.Equal([]int{1, 2}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *AggregatorFabricSuite) TestOk() {
@@ -276,6 +292,7 @@ func (s *AggregatorFabricSuite) TestOk() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -311,4 +328,7 @@ func (s *AggregatorFabricSuite) TestOk() {
 	s.Equal([]int{1, 2, 3}, s.beforeSendValues)
 	s.Equal([]int{1, 2, 3}, s.afterSendValues)
 	s.Equal([]int{2, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }

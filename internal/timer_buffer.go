@@ -23,6 +23,7 @@ func (f *timerFabric[V]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	counter := 0
 	var tmStatus bool
@@ -74,5 +75,15 @@ func (f *timerFabric[V]) Create(
 		}
 	}()
 
-	return f.base.Create(ctx, inputCh, flushCh, beforeSend, send, beforeFlush, flush, capacity)
+	return f.base.Create(
+		ctx,
+		inputCh,
+		flushCh,
+		beforeSend,
+		send,
+		beforeFlush,
+		flush,
+		capacity,
+		cancel,
+	)
 }

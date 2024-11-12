@@ -11,7 +11,7 @@ type multiplexorFabric[V any, C comparable] struct {
 	capacity  int
 }
 
-func NewMultiplezorFabric[V any, C comparable](
+func NewMultiplexorFabric[V any, C comparable](
 	base Fabric[V],
 	separator func(V) C,
 	capacity int,
@@ -32,6 +32,7 @@ func (f *multiplexorFabric[V, C]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	runCtx, cancel := context.WithCancel(ctx)
 	output := make(chan []V)
@@ -52,9 +53,8 @@ func (f *multiplexorFabric[V, C]) Create(
 			func(_ V, _ func()) {},
 			beforeFlush,
 			afterFlush,
-			// func() {},
-			// func(_ int) {},
 			capacity,
+			cancel,
 		)
 		outWg.Add(1)
 		go func() {
@@ -80,7 +80,6 @@ func (f *multiplexorFabric[V, C]) Create(
 	}
 
 	flush := func() {
-		// beforeFlush()
 		wg := sync.WaitGroup{}
 		wg.Add(len(flushMap))
 		for _, fl := range flushMap {
@@ -94,7 +93,6 @@ func (f *multiplexorFabric[V, C]) Create(
 			}()
 		}
 		wg.Wait()
-		// afterFlush()
 	}
 
 	go func() {

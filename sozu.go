@@ -27,8 +27,10 @@ func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(
 		await()
 	}
 
+	innerCtx, cancel := context.WithCancel(ctx)
+
 	return f.base.Create(
-		ctx,
+		innerCtx,
 		input,
 		flushCh,
 		func(_ V, _ func()) {},
@@ -36,6 +38,7 @@ func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(
 		func() {},
 		func(_ int) {},
 		0,
+		cancel,
 	), flush
 }
 

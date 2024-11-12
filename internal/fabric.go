@@ -14,5 +14,6 @@ type Fabric[V any] interface {
 		beforeFlush func(),
 		afterFlush func(int),
 		capacity int,
+		cancel context.CancelFunc,
 	) <-chan []V
 }

@@ -20,6 +20,7 @@ func (f *limitedFabric[V]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	counter := 0
 
@@ -45,5 +46,6 @@ func (f *limitedFabric[V]) Create(
 		beforeFlush,
 		flush,
 		f.limit,
+		cancel,
 	)
 }

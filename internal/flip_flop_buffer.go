@@ -20,6 +20,7 @@ func (f *flipFlopFabric[V, C]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	var state C
 	isStateInitialize := false
@@ -46,5 +47,6 @@ func (f *flipFlopFabric[V, C]) Create(
 		beforeFlush,
 		afterFlush,
 		capacity,
+		cancel,
 	)
 }

@@ -25,6 +25,7 @@ func (f *aggregatorFabric[V]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	output := make(chan []V)
 	counter := 0
@@ -47,6 +48,7 @@ func (f *aggregatorFabric[V]) Create(
 	}
 
 	go func() {
+		defer cancel()
 		defer close(output)
 		for {
 			select {

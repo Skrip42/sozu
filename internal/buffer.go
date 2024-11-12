@@ -20,6 +20,7 @@ func (f *bufferFabric[V]) Create(
 	beforeFlush func(),
 	afterFlush func(int),
 	capacity int,
+	cancel context.CancelFunc,
 ) <-chan []V {
 	output := make(chan []V)
 	buffer := make([]V, 0, capacity)
@@ -42,6 +43,7 @@ func (f *bufferFabric[V]) Create(
 	}
 
 	go func() {
+		defer cancel()
 		defer close(output)
 		for {
 			select {

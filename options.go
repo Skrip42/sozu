@@ -31,6 +31,6 @@ func WithMultiplexor[V any, C comparable](
 	capacity int,
 ) applyOptionFunc[V] {
 	return func(base internal.Fabric[V]) internal.Fabric[V] {
-		return internal.NewMultiplezorFabric(base, separator, capacity)
+		return internal.NewMultiplexorFabric(base, separator, capacity)
 	}
 }

@@ -40,17 +40,17 @@ func (m *MockFabric[V]) EXPECT() *MockFabricMockRecorder[V] {
 }
 
 // Create mocks base method.
-func (m *MockFabric[V]) Create(ctx context.Context, inputCh chan V, flushCh chan func(), beforeSend, afterSend func(V, func()), beforeFlush func(), afterFlush func(int), capacity int) <-chan []V {
+func (m *MockFabric[V]) Create(ctx context.Context, inputCh chan V, flushCh chan func(), beforeSend, afterSend func(V, func()), beforeFlush func(), afterFlush func(int), capacity int, cancel context.CancelFunc) <-chan []V {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity)
+	ret := m.ctrl.Call(m, "Create", ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity, cancel)
 	ret0, _ := ret[0].(<-chan []V)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockFabricMockRecorder[V]) Create(ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity any) *MockFabricCreateCall[V] {
+func (mr *MockFabricMockRecorder[V]) Create(ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity, cancel any) *MockFabricCreateCall[V] {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockFabric[V])(nil).Create), ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockFabric[V])(nil).Create), ctx, inputCh, flushCh, beforeSend, afterSend, beforeFlush, afterFlush, capacity, cancel)
 	return &MockFabricCreateCall[V]{Call: call}
 }
 
@@ -66,13 +66,13 @@ func (c *MockFabricCreateCall[V]) Return(arg0 <-chan []V) *MockFabricCreateCall[
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockFabricCreateCall[V]) Do(f func(context.Context, chan V, chan func(), func(V, func()), func(V, func()), func(), func(int), int) <-chan []V) *MockFabricCreateCall[V] {
+func (c *MockFabricCreateCall[V]) Do(f func(context.Context, chan V, chan func(), func(V, func()), func(V, func()), func(), func(int), int, context.CancelFunc) <-chan []V) *MockFabricCreateCall[V] {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockFabricCreateCall[V]) DoAndReturn(f func(context.Context, chan V, chan func(), func(V, func()), func(V, func()), func(), func(int), int) <-chan []V) *MockFabricCreateCall[V] {
+func (c *MockFabricCreateCall[V]) DoAndReturn(f func(context.Context, chan V, chan func(), func(V, func()), func(V, func()), func(), func(int), int, context.CancelFunc) <-chan []V) *MockFabricCreateCall[V] {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

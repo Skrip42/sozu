@@ -71,7 +71,7 @@ func (s *LimitedFabricSuite) TestOk() {
 		flushCounter++
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	inputCh := make(chan int)
 	flushCh := make(chan func())
 	capacity := 10
@@ -89,6 +89,7 @@ func (s *LimitedFabricSuite) TestOk() {
 		gomock.Any(),
 		gomock.Any(),
 		3,
+		gomock.Any(),
 	).DoAndReturn(
 		func(
 			_ context.Context,
@@ -99,6 +100,7 @@ func (s *LimitedFabricSuite) TestOk() {
 			beforeFlush func(),
 			afterFlush func(int),
 			_ int,
+			_ context.CancelFunc,
 		) <-chan []int {
 			sendF = afterSend
 			flushF = afterFlush
@@ -122,6 +124,7 @@ func (s *LimitedFabricSuite) TestOk() {
 		s.beforeFlush,
 		s.afterFlush,
 		capacity,
+		cancel,
 	)
 
 	// check correct output
@@ -160,5 +163,4 @@ func (s *LimitedFabricSuite) TestOk() {
 	sendF(2, flush)
 	s.Equal(7, s.afterSendCounter)
 	s.Equal(2, flushCounter)
-
 }

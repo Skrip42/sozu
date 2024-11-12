@@ -86,6 +86,7 @@ func (s *BufferFabricSuite) TestWithAfterSendFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -111,6 +112,9 @@ func (s *BufferFabricSuite) TestWithAfterSendFlush() {
 	s.Equal([]int{0, 1}, s.beforeSendValues)
 	s.Equal([]int{0, 1}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
@@ -133,6 +137,7 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -163,10 +168,13 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 	s.Equal([]int{0, 1}, s.beforeSendValues)
 	s.Equal([]int{0, 1}, s.afterSendValues)
 	s.Equal([]int{1, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *BufferFabricSuite) TestWithClosedFlush() {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
 	flushChan := make(chan func())
@@ -180,6 +188,7 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -207,10 +216,13 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 	s.Equal([]int{0, 1}, s.beforeSendValues)
 	s.Equal([]int{0, 1}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *BufferFabricSuite) TestWithClosedInput() {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
 	flushChan := make(chan func())
@@ -224,6 +236,7 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -251,6 +264,9 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 	s.Equal([]int{0, 1}, s.beforeSendValues)
 	s.Equal([]int{0, 1}, s.afterSendValues)
 	s.Equal([]int{2}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
 
 func (s *BufferFabricSuite) TestOk() {
@@ -268,6 +284,7 @@ func (s *BufferFabricSuite) TestOk() {
 		s.beforeFlush,
 		s.afterFlush,
 		100,
+		cancel,
 	)
 
 	go func() {
@@ -303,4 +320,7 @@ func (s *BufferFabricSuite) TestOk() {
 	s.Equal([]int{0, 1, 2}, s.beforeSendValues)
 	s.Equal([]int{0, 1, 2}, s.afterSendValues)
 	s.Equal([]int{2, 1}, s.afterFlushValues)
+
+	// check is context canceled
+	s.NotNil(ctx.Err())
 }
