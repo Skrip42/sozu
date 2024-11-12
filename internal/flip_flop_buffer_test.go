@@ -9,7 +9,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type FlipFlopFabricSuite struct {
+type FlipFlopFactorySuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -22,13 +22,13 @@ type FlipFlopFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	base     *MockFabric[int]
+	base     *MockFactory[int]
 	criteria func(int) bool
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *FlipFlopFabricSuite) SetupTest() {
+func (s *FlipFlopFactorySuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 
 	s.beforeSendCounter = 0
@@ -49,23 +49,23 @@ func (s *FlipFlopFabricSuite) SetupTest() {
 		s.afterFlushCounter++
 	}
 
-	s.base = NewMockFabric[int](ctrl)
+	s.base = NewMockFactory[int](ctrl)
 	s.criteria = func(i int) bool {
 		return i%2 == 0
 	}
 
-	s.fabric = NewFlipFlopFabric(s.base, s.criteria)
+	s.fabric = NewFlipFlopFactory(s.base, s.criteria)
 }
 
-func (s *FlipFlopFabricSuite) TearDownTest() {
+func (s *FlipFlopFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestFlipFlopFabric(t *testing.T) {
-	suite.Run(t, &FlipFlopFabricSuite{})
+func TestFlipFlopFactory(t *testing.T) {
+	suite.Run(t, &FlipFlopFactorySuite{})
 }
 
-func (s *FlipFlopFabricSuite) TestOk() {
+func (s *FlipFlopFactorySuite) TestOk() {
 	flushCounter := 0
 	flush := func() {
 		flushCounter++

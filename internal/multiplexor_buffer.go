@@ -5,25 +5,25 @@ import (
 	"sync"
 )
 
-type multiplexorFabric[V any, C comparable] struct {
-	base      Fabric[V]
+type multiplexorFactory[V any, C comparable] struct {
+	base      Factory[V]
 	separator func(V) C
 	capacity  int
 }
 
-func NewMultiplexorFabric[V any, C comparable](
-	base Fabric[V],
+func NewMultiplexorFactory[V any, C comparable](
+	base Factory[V],
 	separator func(V) C,
 	capacity int,
-) Fabric[V] {
-	return &multiplexorFabric[V, C]{
+) Factory[V] {
+	return &multiplexorFactory[V, C]{
 		base:      base,
 		separator: separator,
 		capacity:  capacity,
 	}
 }
 
-func (f *multiplexorFabric[V, C]) Create(
+func (f *multiplexorFactory[V, C]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),

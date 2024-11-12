@@ -6,23 +6,23 @@ import (
 	"github.com/Skrip42/sozu/internal"
 )
 
-type applyOptionFunc[V any] func(internal.Fabric[V]) internal.Fabric[V]
+type applyOptionFunc[V any] func(internal.Factory[V]) internal.Factory[V]
 
 func WithLimit[V any](limit int) applyOptionFunc[V] {
-	return func(base internal.Fabric[V]) internal.Fabric[V] {
-		return internal.NewLimitedFabric(base, limit)
+	return func(base internal.Factory[V]) internal.Factory[V] {
+		return internal.NewLimitedFactory(base, limit)
 	}
 }
 
 func WithTimer[V any](duratiorn time.Duration) applyOptionFunc[V] {
-	return func(base internal.Fabric[V]) internal.Fabric[V] {
-		return internal.NewTimerFabric(base, duratiorn)
+	return func(base internal.Factory[V]) internal.Factory[V] {
+		return internal.NewTimerFactory(base, duratiorn)
 	}
 }
 
 func WithFlipFlop[V any, C comparable](criteria func(V) C) applyOptionFunc[V] {
-	return func(base internal.Fabric[V]) internal.Fabric[V] {
-		return internal.NewFlipFlopFabric(base, criteria)
+	return func(base internal.Factory[V]) internal.Factory[V] {
+		return internal.NewFlipFlopFactory(base, criteria)
 	}
 }
 
@@ -30,7 +30,7 @@ func WithMultiplexor[V any, C comparable](
 	separator func(V) C,
 	capacity int,
 ) applyOptionFunc[V] {
-	return func(base internal.Fabric[V]) internal.Fabric[V] {
-		return internal.NewMultiplexorFabric(base, separator, capacity)
+	return func(base internal.Factory[V]) internal.Factory[V] {
+		return internal.NewMultiplexorFactory(base, separator, capacity)
 	}
 }

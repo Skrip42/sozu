@@ -7,12 +7,12 @@ import (
 	"github.com/Skrip42/sozu/internal/helper"
 )
 
-type Fabric[V any] interface {
+type Factory[V any] interface {
 	Create(ctx context.Context, input chan V) (<-chan []V, func(context.Context))
 }
 
 type fabric[V any] struct {
-	base internal.Fabric[V]
+	base internal.Factory[V]
 }
 
 func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(context.Context)) {
@@ -42,16 +42,16 @@ func (f *fabric[V]) Create(ctx context.Context, input chan V) (<-chan []V, func(
 	), flush
 }
 
-func NewBuffer[V any](opts ...applyOptionFunc[V]) Fabric[V] {
-	fb := internal.NewBufferFabric[V]()
+func NewBuffer[V any](opts ...applyOptionFunc[V]) Factory[V] {
+	fb := internal.NewBufferFactory[V]()
 	for _, opt := range opts {
 		fb = opt(fb)
 	}
 	return &fabric[V]{fb}
 }
 
-func NewAggregator[V any](aggregateFunc func(V, V) V, opts ...applyOptionFunc[V]) Fabric[V] {
-	fb := internal.NewAggregatorFabric(aggregateFunc)
+func NewAggregator[V any](aggregateFunc func(V, V) V, opts ...applyOptionFunc[V]) Factory[V] {
+	fb := internal.NewAggregatorFactory(aggregateFunc)
 	for _, opt := range opts {
 		fb = opt(fb)
 	}

@@ -4,19 +4,19 @@ import (
 	"context"
 )
 
-type aggregatorFabric[V any] struct {
+type aggregatorFactory[V any] struct {
 	aggregateFunc func(a, b V) V
 }
 
-func NewAggregatorFabric[V any](
+func NewAggregatorFactory[V any](
 	aggregateFunc func(a, b V) V,
-) Fabric[V] {
-	return &aggregatorFabric[V]{
+) Factory[V] {
+	return &aggregatorFactory[V]{
 		aggregateFunc: aggregateFunc,
 	}
 }
 
-func (f *aggregatorFabric[V]) Create(
+func (f *aggregatorFactory[V]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),

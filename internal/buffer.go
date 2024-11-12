@@ -4,14 +4,14 @@ import (
 	"context"
 )
 
-type bufferFabric[V any] struct {
+type bufferFactory[V any] struct {
 }
 
-func NewBufferFabric[V any]() Fabric[V] {
-	return &bufferFabric[V]{}
+func NewBufferFactory[V any]() Factory[V] {
+	return &bufferFactory[V]{}
 }
 
-func (f *bufferFabric[V]) Create(
+func (f *bufferFactory[V]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),

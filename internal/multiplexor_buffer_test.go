@@ -10,7 +10,7 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-type MultiplexorFabricSuite struct {
+type MultiplexorFactorySuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -25,13 +25,13 @@ type MultiplexorFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	base      *MockFabric[int]
+	base      *MockFactory[int]
 	separator func(int) int
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *MultiplexorFabricSuite) SetupTest() {
+func (s *MultiplexorFactorySuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 
 	s.beforeSendCounter = 0
@@ -55,23 +55,23 @@ func (s *MultiplexorFabricSuite) SetupTest() {
 		s.afterFlushValues = append(s.afterFlushValues, count)
 	}
 
-	s.base = NewMockFabric[int](ctrl)
+	s.base = NewMockFactory[int](ctrl)
 	s.separator = func(i int) int {
 		return i % 3
 	}
 
-	s.fabric = NewMultiplexorFabric(s.base, s.separator, 3)
+	s.fabric = NewMultiplexorFactory(s.base, s.separator, 3)
 }
 
-func (s *MultiplexorFabricSuite) TearDownTest() {
+func (s *MultiplexorFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestMultiplexorFabric(t *testing.T) {
-	suite.Run(t, &MultiplexorFabricSuite{})
+func TestMultiplexorFactory(t *testing.T) {
+	suite.Run(t, &MultiplexorFactorySuite{})
 }
 
-func (s *MultiplexorFabricSuite) TestOk() {
+func (s *MultiplexorFactorySuite) TestOk() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	outputCh := []chan []int{

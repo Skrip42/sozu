@@ -9,7 +9,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type LimitedFabricSuite struct {
+type LimitedFactorySuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -22,12 +22,12 @@ type LimitedFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	base *MockFabric[int]
+	base *MockFactory[int]
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *LimitedFabricSuite) SetupTest() {
+func (s *LimitedFactorySuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 
 	s.beforeSendCounter = 0
@@ -48,20 +48,20 @@ func (s *LimitedFabricSuite) SetupTest() {
 		s.afterFlushCounter++
 	}
 
-	s.base = NewMockFabric[int](ctrl)
+	s.base = NewMockFactory[int](ctrl)
 
-	s.fabric = NewLimitedFabric(s.base, 3)
+	s.fabric = NewLimitedFactory(s.base, 3)
 }
 
-func (s *LimitedFabricSuite) TearDownTest() {
+func (s *LimitedFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestLimitedFabric(t *testing.T) {
-	suite.Run(t, &LimitedFabricSuite{})
+func TestLimitedFactory(t *testing.T) {
+	suite.Run(t, &LimitedFactorySuite{})
 }
 
-func (s *LimitedFabricSuite) TestOk() {
+func (s *LimitedFactorySuite) TestOk() {
 	flushCounter := 0
 	flush := func() {
 		flushCounter++

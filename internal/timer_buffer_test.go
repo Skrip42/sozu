@@ -10,7 +10,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type TimerFabricSuite struct {
+type TimerFactorySuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -23,12 +23,12 @@ type TimerFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	base *MockFabric[int]
+	base *MockFactory[int]
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *TimerFabricSuite) SetupTest() {
+func (s *TimerFactorySuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 
 	s.beforeSendCounter = 0
@@ -49,20 +49,20 @@ func (s *TimerFabricSuite) SetupTest() {
 		s.afterFlushCounter++
 	}
 
-	s.base = NewMockFabric[int](ctrl)
+	s.base = NewMockFactory[int](ctrl)
 
-	s.fabric = NewTimerFabric(s.base, time.Millisecond)
+	s.fabric = NewTimerFactory(s.base, time.Millisecond)
 }
 
-func (s *TimerFabricSuite) TearDownTest() {
+func (s *TimerFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestTimerFabric(t *testing.T) {
-	suite.Run(t, &TimerFabricSuite{})
+func TestTimerFactory(t *testing.T) {
+	suite.Run(t, &TimerFactorySuite{})
 }
 
-func (s *TimerFabricSuite) TestOk() {
+func (s *TimerFactorySuite) TestOk() {
 	flushCounter := 0
 	flush := func() {
 		flushCounter++

@@ -9,7 +9,7 @@ import (
 	"go.uber.org/goleak"
 )
 
-type AggregatorFabricSuite struct {
+type AggregatorFactorySuite struct {
 	suite.Suite
 
 	aggregateFunc func(a, b int) int
@@ -28,10 +28,10 @@ type AggregatorFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *AggregatorFabricSuite) SetupTest() {
+func (s *AggregatorFactorySuite) SetupTest() {
 
 	s.aggregateFunc = func(a, b int) int {
 		return a + b
@@ -62,18 +62,18 @@ func (s *AggregatorFabricSuite) SetupTest() {
 		s.afterFlushValues = append(s.afterFlushValues, count)
 	}
 
-	s.fabric = NewAggregatorFabric[int](s.aggregateFunc)
+	s.fabric = NewAggregatorFactory[int](s.aggregateFunc)
 }
 
-func (s *AggregatorFabricSuite) TearDownTest() {
+func (s *AggregatorFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestAggregatorFabric(t *testing.T) {
-	suite.Run(t, &AggregatorFabricSuite{})
+func TestAggregatorFactory(t *testing.T) {
+	suite.Run(t, &AggregatorFactorySuite{})
 }
 
-func (s *AggregatorFabricSuite) TestWithAfterSendFlush() {
+func (s *AggregatorFactorySuite) TestWithAfterSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -125,7 +125,7 @@ func (s *AggregatorFabricSuite) TestWithAfterSendFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
+func (s *AggregatorFactorySuite) TestWithBeforeSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -181,7 +181,7 @@ func (s *AggregatorFabricSuite) TestWithBeforeSendFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *AggregatorFabricSuite) TestWithClosedFlush() {
+func (s *AggregatorFactorySuite) TestWithClosedFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -229,7 +229,7 @@ func (s *AggregatorFabricSuite) TestWithClosedFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *AggregatorFabricSuite) TestWithClosedInput() {
+func (s *AggregatorFactorySuite) TestWithClosedInput() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -277,7 +277,7 @@ func (s *AggregatorFabricSuite) TestWithClosedInput() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *AggregatorFabricSuite) TestOk() {
+func (s *AggregatorFactorySuite) TestOk() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)

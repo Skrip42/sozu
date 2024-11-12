@@ -2,16 +2,16 @@ package internal
 
 import "context"
 
-type flipFlopFabric[V any, C comparable] struct {
-	base     Fabric[V]
+type flipFlopFactory[V any, C comparable] struct {
+	base     Factory[V]
 	criteria func(V) C
 }
 
-func NewFlipFlopFabric[V any, C comparable](base Fabric[V], criteria func(V) C) Fabric[V] {
-	return &flipFlopFabric[V, C]{base: base, criteria: criteria}
+func NewFlipFlopFactory[V any, C comparable](base Factory[V], criteria func(V) C) Factory[V] {
+	return &flipFlopFactory[V, C]{base: base, criteria: criteria}
 }
 
-func (f *flipFlopFabric[V, C]) Create(
+func (f *flipFlopFactory[V, C]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),

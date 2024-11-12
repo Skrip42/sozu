@@ -1,10 +1,10 @@
 package internal
 
-//go:generate mockgen -typed -destination=fabric_mock.go -source=fabric.go -package=internal
+//go:generate mockgen -typed -destination=factory_mock.go -source=factory.go -package=internal
 
 import "context"
 
-type Fabric[V any] interface {
+type Factory[V any] interface {
 	Create(
 		ctx context.Context,
 		inputCh chan V,

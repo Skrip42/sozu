@@ -2,16 +2,16 @@ package internal
 
 import "context"
 
-type limitedFabric[V any] struct {
-	base  Fabric[V]
+type limitedFactory[V any] struct {
+	base  Factory[V]
 	limit int
 }
 
-func NewLimitedFabric[V any](base Fabric[V], limit int) Fabric[V] {
-	return &limitedFabric[V]{base: base, limit: limit}
+func NewLimitedFactory[V any](base Factory[V], limit int) Factory[V] {
+	return &limitedFactory[V]{base: base, limit: limit}
 }
 
-func (f *limitedFabric[V]) Create(
+func (f *limitedFactory[V]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),

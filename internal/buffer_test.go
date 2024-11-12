@@ -9,7 +9,7 @@ import (
 	"go.uber.org/goleak"
 )
 
-type BufferFabricSuite struct {
+type BufferFactorySuite struct {
 	suite.Suite
 
 	beforeSendCounter  int
@@ -26,10 +26,10 @@ type BufferFabricSuite struct {
 	beforeFlush func()
 	afterFlush  func(int)
 
-	fabric Fabric[int]
+	fabric Factory[int]
 }
 
-func (s *BufferFabricSuite) SetupTest() {
+func (s *BufferFactorySuite) SetupTest() {
 	s.beforeSendCounter = 0
 	s.afterSendCounter = 0
 	s.beforeFlushCounter = 0
@@ -55,18 +55,18 @@ func (s *BufferFabricSuite) SetupTest() {
 		s.afterFlushValues = append(s.afterFlushValues, count)
 	}
 
-	s.fabric = NewBufferFabric[int]()
+	s.fabric = NewBufferFactory[int]()
 }
 
-func (s *BufferFabricSuite) TearDownTest() {
+func (s *BufferFactorySuite) TearDownTest() {
 	goleak.VerifyNone(s.T())
 }
 
-func TestBufferFabric(t *testing.T) {
-	suite.Run(t, &BufferFabricSuite{})
+func TestBufferFactory(t *testing.T) {
+	suite.Run(t, &BufferFactorySuite{})
 }
 
-func (s *BufferFabricSuite) TestWithAfterSendFlush() {
+func (s *BufferFactorySuite) TestWithAfterSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -117,7 +117,7 @@ func (s *BufferFabricSuite) TestWithAfterSendFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
+func (s *BufferFactorySuite) TestWithBeforeSendFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -173,7 +173,7 @@ func (s *BufferFabricSuite) TestWithBeforeSendFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *BufferFabricSuite) TestWithClosedFlush() {
+func (s *BufferFactorySuite) TestWithClosedFlush() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -221,7 +221,7 @@ func (s *BufferFabricSuite) TestWithClosedFlush() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *BufferFabricSuite) TestWithClosedInput() {
+func (s *BufferFactorySuite) TestWithClosedInput() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)
@@ -269,7 +269,7 @@ func (s *BufferFabricSuite) TestWithClosedInput() {
 	s.NotNil(ctx.Err())
 }
 
-func (s *BufferFabricSuite) TestOk() {
+func (s *BufferFactorySuite) TestOk() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	inputChan := make(chan int)

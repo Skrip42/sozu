@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-type timerFabric[V any] struct {
-	base      Fabric[V]
+type timerFactory[V any] struct {
+	base      Factory[V]
 	duratiorn time.Duration
 }
 
-func NewTimerFabric[V any](base Fabric[V], duration time.Duration) Fabric[V] {
-	return &timerFabric[V]{base: base, duratiorn: duration}
+func NewTimerFactory[V any](base Factory[V], duration time.Duration) Factory[V] {
+	return &timerFactory[V]{base: base, duratiorn: duration}
 }
 
-func (f *timerFabric[V]) Create(
+func (f *timerFactory[V]) Create(
 	ctx context.Context,
 	inputCh chan V,
 	flushCh chan func(),
