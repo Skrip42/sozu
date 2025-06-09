@@ -35,11 +35,8 @@ func (f *bufferFactory[V]) Create(
 		copy(tmp, buffer)
 		buffer = buffer[:0]
 
-		select {
-		case output <- tmp:
-			afterFlush(flushCount)
-		case <-ctx.Done():
-		}
+		output <- tmp
+		afterFlush(flushCount)
 	}
 
 	go func() {
@@ -63,6 +60,7 @@ func (f *bufferFactory[V]) Create(
 				flush()
 				done()
 			case <-ctx.Done():
+				flush()
 				return
 			}
 		}

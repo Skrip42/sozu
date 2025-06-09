@@ -34,7 +34,6 @@ func (f *multiplexorFactory[V, C]) Create(
 	capacity int,
 	cancel context.CancelFunc,
 ) <-chan []V {
-	runCtx, runCancel := context.WithCancel(ctx)
 	output := make(chan []V)
 
 	flushMap := make(map[C]chan func(), f.capacity)
@@ -48,7 +47,7 @@ func (f *multiplexorFactory[V, C]) Create(
 		flushMap[selector] = make(chan func())
 		lastAfterFlushCount[selector] = 0
 		outputCh := f.base.Create(
-			runCtx,
+			ctx,
 			inputMap[selector],
 			flushMap[selector],
 			func(_ V, _ func()) {},
@@ -62,20 +61,12 @@ func (f *multiplexorFactory[V, C]) Create(
 		go func() {
 			defer outWg.Done()
 			for {
-				select {
-				case items, ok := <-outputCh:
-					if !ok {
-						return
-					}
-					select {
-					case output <- items:
-						afterFlush(lastAfterFlushCount[selector])
-					case <-runCtx.Done():
-						return
-					}
-				case <-runCtx.Done():
+				items, ok := <-outputCh
+				if !ok {
 					return
 				}
+				output <- items
+				afterFlush(lastAfterFlushCount[selector])
 			}
 		}()
 
@@ -89,7 +80,7 @@ func (f *multiplexorFactory[V, C]) Create(
 			go func() {
 				select {
 				case fl <- func() { wg.Done() }:
-				case <-runCtx.Done():
+				case <-ctx.Done():
 					wg.Done()
 				}
 			}()
@@ -98,7 +89,6 @@ func (f *multiplexorFactory[V, C]) Create(
 	}
 
 	go func() {
-		defer runCancel()
 		for {
 			select {
 			case item, ok := <-inputCh:
@@ -119,13 +109,15 @@ func (f *multiplexorFactory[V, C]) Create(
 				beforeSend(item, flush)
 				select {
 				case input <- item:
-				case <-runCtx.Done():
+				case <-ctx.Done():
 				}
 				afterSend(item, flush)
 			case done := <-flushCh:
 				flush()
 				done()
-			case <-runCtx.Done():
+			case <-ctx.Done():
+				flush()
+				close(output)
 				return
 			}
 		}

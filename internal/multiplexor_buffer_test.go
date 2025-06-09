@@ -187,10 +187,18 @@ func (s *MultiplexorFactorySuite) TestOk() {
 	i3 := <-output
 	s.Equal([]int{2}, i3)
 
+	close(outputCh[0])
+	close(outputCh[1])
+	close(outputCh[2])
+
 	s.Equal(3, s.afterFlushCounter)
 	s.Equal([]int{0, 1, 2}, s.afterFlushValues)
 
+	cancel()
+
+	_, ok := <-output
+	s.False(ok)
+
 	close(inputCh)
 
-	cancel()
 }
