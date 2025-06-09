@@ -89,6 +89,10 @@ func (f *multiplexorFactory[V, C]) Create(
 	}
 
 	go func() {
+		defer func() {
+			outWg.Wait()
+			close(output)
+		}()
 		for {
 			select {
 			case item, ok := <-inputCh:
@@ -97,8 +101,6 @@ func (f *multiplexorFactory[V, C]) Create(
 					for _, inch := range inputMap {
 						close(inch)
 					}
-					outWg.Wait()
-					close(output)
 					return
 				}
 				selector := f.separator(item)
@@ -117,7 +119,6 @@ func (f *multiplexorFactory[V, C]) Create(
 				done()
 			case <-ctx.Done():
 				flush()
-				close(output)
 				return
 			}
 		}

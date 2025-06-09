@@ -39,10 +39,7 @@ func (f *aggregatorFactory[V]) Create(
 		flushCount := counter
 		counter = 0
 
-		select {
-		case output <- []V{aggregateValue}:
-		case <-ctx.Done():
-		}
+		output <- []V{aggregateValue}
 
 		afterFlush(flushCount)
 	}
@@ -69,6 +66,7 @@ func (f *aggregatorFactory[V]) Create(
 				flush()
 				done()
 			case <-ctx.Done():
+				flush()
 				return
 			}
 		}
